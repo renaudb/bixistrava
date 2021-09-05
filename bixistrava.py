@@ -56,19 +56,19 @@ def main():
     args = _get_args()
     username = args.bixi_username
     if not username:
-        raise ValueError('Missing USERNAME')
+        raise ValueError('Missing Bixi username')
     password = args.bixi_password
     if not password:
-        raise ValueError('Missing PASSWORD')
+        raise ValueError('Missing Bixi password')
     account = args.bixi_account
     if not account:
-        raise ValueError('Missing ACCOUNT')
+        raise ValueError('Missing Bixi account')
     googlemaps_api_key = args.googlemaps_api_key
     if not googlemaps_api_key:
-        raise ValueError('Missing GOOGLEMAPS_API_KEY')
+        raise ValueError('Missing Google Maps API key')
 
-    start = datetime(2021, 8, 24)
-    end = datetime(2021, 8, 24)
+    start = args.start_date
+    end = args.end_date
 
     logging.info('Connecting to Bixi.')
     bixi = Bixi(username, password, account)
