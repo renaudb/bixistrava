@@ -3,6 +3,7 @@ import requests
 
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+from pytz import timezone
 from urllib.parse import urlparse
 
 from bixi.station import Station
@@ -54,14 +55,15 @@ class Bixi(object):
 
     def _parse_trip_rows(self, start, end, stations: dict[str, Station]) -> Trip:
         INFO_PREFIX = 'ed-html-table__item__info_trip-'
+        tz = timezone('US/Eastern')
         s_ds = start.find(class_ = INFO_PREFIX + 'start-date').contents[1].strip()
-        s_dt = datetime.strptime(s_ds, '%d/%m/%Y %H:%M:%S')
+        s_dt = tz.localize(datetime.strptime(s_ds, '%d/%m/%Y %H:%M:%S'))
         s_station_name = start.find(class_ = INFO_PREFIX + 'start-station').text.strip()
         s_station = stations[s_station_name]
         if not s_station:
             logging.error(f'Missing start station: {s_station_name}')
         e_ds = end.find(class_ = INFO_PREFIX + 'end-date').contents[1].strip()
-        e_dt = datetime.strptime(e_ds, '%d/%m/%Y %H:%M:%S')
+        e_dt = tz.localize(datetime.strptime(e_ds, '%d/%m/%Y %H:%M:%S'))
         e_station_name = end.find(class_ = INFO_PREFIX + 'end-station').text.strip()
         e_station = stations[e_station_name]
         if not e_station:

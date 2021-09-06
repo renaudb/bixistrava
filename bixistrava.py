@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 
 from bixi import Bixi, Station, Trip
+from strava import Strava
 from tripdistancecalculator import GoogleMapsTripDistanceCalculator
 
 def _get_args():
@@ -44,6 +45,17 @@ def _get_args():
         type=str,
         default=os.environ.get('GOOGLEMAPS_API_KEY'),
     )
+    # Strava arguments.
+    parser.add_argument(
+        '--strava-client-id',
+        type=str,
+        default=os.environ.get('STRAVA_CLIENT_ID'),
+    )
+    parser.add_argument(
+        '--strava-client-secret',
+        type=str,
+        default=os.environ.get('STRAVA_CLIENT_SECRET'),
+    )
     return parser.parse_args()
 
 def main():
@@ -66,6 +78,12 @@ def main():
     googlemaps_api_key = args.googlemaps_api_key
     if not googlemaps_api_key:
         raise ValueError('Missing Google Maps API key')
+    strava_client_id = args.strava_client_id
+    if not strava_client_id:
+        raise ValueError('Missing Strava client id')
+    strava_client_secret = args.strava_client_secret
+    if not strava_client_secret:
+        raise ValueError('Missing Strava client secret')
 
     start = args.start_date
     end = args.end_date
@@ -85,4 +103,23 @@ def main():
     logging.info(f'Calculated {len(distances)} distances')
     for d in distances: logging.debug(f'Distance: {d}')
 
-main()
+    logging.info('Connecting to Strava')
+    strava = Strava.auth(strava_client_id, strava_client_secret)
+    logging.info('Connected to Strava')
+
+    logging.info('Creating activities')
+    for (t, d) in zip(trips, distances):
+        r = strava.create_activity(
+            name = 'Bixi Ride',
+            type = 'Ride',
+            start_date_local = t.start_dt,
+            elapsed_time = int(t.duration().total_seconds()),
+            description = f'Bixi ride from {t.start_station.name} to {t.end_station.name}',
+            distance = d,
+            commute = True,
+        )
+        logging.debug(f'Created activity: {r.json()}')
+    logging.info('Created activities')
+
+if __name__ == "__main__":
+    main()

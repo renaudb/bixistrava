@@ -20,7 +20,7 @@ def _authorize_url(client_id: str, redirect_uri: str, response_type: str = 'code
     }
     return url + '?' + urllib.parse.urlencode(params)
 
-def _token(client_id: str, client_secret: str, grant_type: str, code: str = None, refresh_token = None) -> dict[str, Any]:
+def _token(client_id: str, client_secret: str, grant_type: str, code: str = None, refresh_token = None) -> requests.Response:
     url = 'https://www.strava.com/api/v3/oauth/token'
     data = {
         'client_id' : client_id,
@@ -31,10 +31,9 @@ def _token(client_id: str, client_secret: str, grant_type: str, code: str = None
         data['code'] = code
     if refresh_token is not None:
         data['refresh_token'] = refresh_token
-    r = requests.post(url, data = data)
-    return r.json()
+    return requests.post(url, data = data)
 
-def auth(client_id: str, client_secret: str) -> dict[str, Any]:
+def auth(client_id: str, client_secret: str) -> requests.Response:
     host = '127.0.0.1'
     port = 5000
     # Open auth page in browser.
@@ -45,12 +44,12 @@ def auth(client_id: str, client_secret: str) -> dict[str, Any]:
     )
     webbrowser.open(url)
     # Fetch token.
-    data = None
+    r = None
     app = Flask(__name__)
     @app.route("/callback")
     def callback():
-        nonlocal data
-        data = _token(
+        nonlocal r
+        r = _token(
             client_id = client_id,
             client_secret = client_secret,
             grant_type = 'authorization_code',
@@ -60,9 +59,9 @@ def auth(client_id: str, client_secret: str) -> dict[str, Any]:
         return 'Success!'
     app.run(host = host, port = port)
     # Return token
-    return data
+    return r
 
-def refresh(client_id: str, client_secret: str, refresh_token: str) -> dict[str, Any]:
+def refresh(client_id: str, client_secret: str, refresh_token: str) -> requests.Response:
     return _token(
         client_id = client_id,
         client_secret = client_secret,
@@ -86,8 +85,8 @@ def _get_args():
 
 def main():
     args = _get_args()
-    data = auth(args.client_id, args.client_secret)
-    print(json.dumps(data, sort_keys=True, indent=4))
+    r = auth(args.client_id, args.client_secret)
+    print(json.dumps(r.json(), sort_keys=True, indent=4))
 
 if __name__ == "__main__":
     main()
