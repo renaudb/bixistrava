@@ -10,8 +10,10 @@ from bixi import Bixi, Station, Trip
 from strava import Strava
 from tripdistancecalculator import GoogleMapsTripDistanceCalculator
 
+
 def _get_args():
-    parser = argparse.ArgumentParser(description='Upload Bixi activities to Strava.')
+    parser = argparse.ArgumentParser(
+        description='Upload Bixi activities to Strava.')
     # Start/end dates.
     parser.add_argument(
         '--start-date',
@@ -58,11 +60,12 @@ def _get_args():
     )
     return parser.parse_args()
 
+
 def main():
     logging.basicConfig(
-        encoding = 'utf-8',
-        format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level = logging.DEBUG,
+        encoding='utf-8',
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.DEBUG,
     )
 
     args = _get_args()
@@ -95,13 +98,15 @@ def main():
     logging.info(f'Fetching trips from {start} to {end}')
     trips = bixi.trips(start, end)
     logging.info(f'Fetched {len(trips)} trips')
-    for t in trips: logging.debug(f'Trip: {t}')
+    for t in trips:
+        logging.debug(f'Trip: {t}')
 
     logging.info('Calculating distances using Google Maps')
     calc = GoogleMapsTripDistanceCalculator(googlemaps_api_key)
     distances = calc.distances(trips)
     logging.info(f'Calculated {len(distances)} distances')
-    for d in distances: logging.debug(f'Distance: {d}')
+    for d in distances:
+        logging.debug(f'Distance: {d}')
 
     logging.info('Connecting to Strava')
     strava = Strava.auth(strava_client_id, strava_client_secret)
@@ -110,16 +115,18 @@ def main():
     logging.info('Creating activities')
     for (t, d) in zip(trips, distances):
         r = strava.create_activity(
-            name = 'Bixi Ride',
-            type = 'Ride',
-            start_date_local = t.start_dt,
-            elapsed_time = int(t.duration().total_seconds()),
-            description = f'Bixi ride from {t.start_station.name} to {t.end_station.name}',
-            distance = d,
-            commute = True,
+            name='Bixi Ride',
+            type='Ride',
+            start_date_local=t.start_dt,
+            elapsed_time=int(t.duration.total_seconds()),
+            description=
+            f'Bixi ride from {t.start_station.name} to {t.end_station.name}',
+            distance=d,
+            commute=True,
         )
         logging.debug(f'Created activity: {r.json()}')
     logging.info('Created activities')
+
 
 if __name__ == "__main__":
     main()

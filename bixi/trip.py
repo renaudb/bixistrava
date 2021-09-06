@@ -2,13 +2,16 @@ from datetime import datetime, timedelta
 
 from bixi.station import Station
 
+
 class Trip(object):
-    def __init__(self, start_dt: datetime, start_station: Station, end_dt: datetime, end_station: Station):
+    def __init__(self, start_dt: datetime, start_station: Station,
+                 end_dt: datetime, end_station: Station):
         self.start_dt = start_dt
         self.start_station = start_station
         self.end_dt = end_dt
         self.end_station = end_station
 
+    @property
     def duration(self) -> timedelta:
         return self.end_dt - self.start_dt
 
