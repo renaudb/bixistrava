@@ -5,28 +5,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
-class Station(object):
-    def __init__(self, id: str, name: str, lat: float, lng: float):
-        self.id = id
-        self.name = name
-        self.lat = lat
-        self.lng = lng
-
-    def __repr__(self) -> str:
-        return f'Station([{self.id}, {self.name}, {self.lat}, {self.lng}])'
-
-class Trip(object):
-    def __init__(self, start_dt: datetime, start_station: Station, end_dt: datetime, end_station: Station):
-        self.start_dt = start_dt
-        self.start_station = start_station
-        self.end_dt = end_dt
-        self.end_station = end_station
-
-    def duration(self) -> timedelta:
-        self.end_dt - self.start_dt
-
-    def __repr__(self) -> str:
-        return f'Trip([{self.start_dt}, {self.start_station}, {self.end_dt}, {self.end_station}])'
+from bixi.station import Station
+from bixi.trip import Trip
 
 class Bixi(object):
     LOGIN_URL = 'https://secure.bixi.com/profile/login'
