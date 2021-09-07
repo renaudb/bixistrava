@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from pytz import timezone
 from urllib.parse import urlparse
 
-from bixi.station import Station
-from bixi.trip import Trip
+from .station import Station
+from .trip import Trip
 
 
 class Bixi(object):

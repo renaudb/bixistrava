@@ -3,11 +3,11 @@
 # Simple script to format and typecheck code.
 
 ./.venv/bin/mypy \
-     *.py \
-     bixi/*.py \
-     strava/*.py
+     bixistrava/*.py \
+     bixistrava/bixi/*.py \
+     bixistrava/strava/*.py
 
 ./.venv/bin/yapf -i \
-     *.py \
-     bixi/*.py \
-     strava/*.py
+     bixistrava/*.py \
+     bixistrava/bixi/*.py \
+     bixistrava/strava/*.py

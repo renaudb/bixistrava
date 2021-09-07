@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from bixi.station import Station
+from .station import Station
 
 
 class Trip(object):

@@ -3,7 +3,7 @@
 import logging
 import requests
 
-from bixi import Trip
+from .bixi import Trip
 
 
 class ITripDistanceCalculator(object):

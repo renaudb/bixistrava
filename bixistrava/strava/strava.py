@@ -3,7 +3,7 @@ import requests
 from datetime import datetime
 from typing import Any
 
-from strava.auth import auth, refresh
+from .auth import auth, refresh
 
 
 class StravaAuth(requests.auth.AuthBase):
