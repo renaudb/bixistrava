@@ -1,8 +1,18 @@
-#!/usr/bin/python3
+"""Strava auth utilities.
+
+Includes functions as well as a simple script to perform Strava auth.
+
+  Script usage:
+
+  ./.venv/bin/python3 auth.py \
+    --client-id STRAVA_CLIENT_ID \
+    --client-secret STRAVA_CLIENT_SECRET
+"""
 
 import argparse
 import json
 import requests
+import typing as t
 import urllib.parse
 import webbrowser
 
@@ -45,6 +55,10 @@ def _token(client_id: str,
 
 
 def auth(client_id: str, client_secret: str) -> requests.Response:
+    """Authenticates a Strava user using the OAuth2 API. Includes a browser
+    redirect. Returns the final API response including `access_token` and
+    `refresh_token`.
+    """
     host = '127.0.0.1'
     port = 5000
     # Open auth page in browser.
@@ -55,7 +69,7 @@ def auth(client_id: str, client_secret: str) -> requests.Response:
     )
     webbrowser.open(url)
     # Fetch token.
-    r = None
+    r: t.Optional[requests.Response] = None
     app = Flask(__name__)
 
     @app.route("/callback")
@@ -71,12 +85,17 @@ def auth(client_id: str, client_secret: str) -> requests.Response:
         return 'Success!'
 
     app.run(host=host, port=port)
-    # Return token
+    # Assert token was set.
+    assert r is not None
+    # Return token.
     return r
 
 
 def refresh(client_id: str, client_secret: str,
             refresh_token: str) -> requests.Response:
+    """Refreshes a Strava `access_token` using an existing`refresh_token`.
+    Returns the final API response including `access_token` and `refresh_token`.
+    """
     return _token(
         client_id=client_id,
         client_secret=client_secret,
@@ -85,7 +104,7 @@ def refresh(client_id: str, client_secret: str,
     )
 
 
-def _get_args():
+def _get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Authenticate with Strava.')
     parser.add_argument(
         '--client-id',
@@ -101,6 +120,7 @@ def _get_args():
 
 
 def main():
+    """Simple script to fetch and print a Strava `access_token`."""
     args = _get_args()
     r = auth(args.client_id, args.client_secret)
     print(json.dumps(r.json(), sort_keys=True, indent=4))

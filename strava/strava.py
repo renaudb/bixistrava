@@ -7,6 +7,7 @@ from strava.auth import auth, refresh
 
 
 class StravaAuth(requests.auth.AuthBase):
+    """AuthBase class adding the `access_token` Bearer Auth to a request."""
     def __init__(self, access_token: str):
         self.access_token = access_token
 
@@ -25,6 +26,9 @@ class Strava(object):
 
     @classmethod
     def auth(cls, client_id: str, client_secret: str) -> 'Strava':
+        """Creates an authenticated Strava client through a browser
+        redirect.
+        """
         r = auth(client_id, client_secret)
         data = r.json()
         return cls(data['access_token'], data['refresh_token'])
@@ -32,6 +36,9 @@ class Strava(object):
     @classmethod
     def refresh(cls, client_id: str, client_secret: str,
                 refresh_token: str) -> 'Strava':
+        """Creates an authenticated Strava client by refreshing a
+        `refresh_token`.
+        """
         r = refresh(client_id, client_secret, refresh_token)
         data = r.json()
         return cls(data['access_token'], data['refresh_token'])
@@ -48,6 +55,7 @@ class Strava(object):
                         distance: float = 0.0,
                         trainer: bool = False,
                         commute: bool = False) -> requests.Response:
+        """Creates an activity on Strava."""
         data = {
             'name': name,
             'type': type,

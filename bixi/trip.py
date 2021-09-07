@@ -4,6 +4,7 @@ from bixi.station import Station
 
 
 class Trip(object):
+    """Bixi trip data class."""
     def __init__(self, start_dt: datetime, start_station: Station,
                  end_dt: datetime, end_station: Station):
         self.start_dt = start_dt
@@ -13,6 +14,7 @@ class Trip(object):
 
     @property
     def duration(self) -> timedelta:
+        """Returns trip duration."""
         return self.end_dt - self.start_dt
 
     def __repr__(self) -> str:

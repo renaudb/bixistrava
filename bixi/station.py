@@ -1,4 +1,5 @@
 class Station(object):
+    """Bixi station data class."""
     def __init__(self, id: str, name: str, lat: float, lng: float):
         self.id = id
         self.name = name

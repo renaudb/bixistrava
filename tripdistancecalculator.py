@@ -1,18 +1,27 @@
+"""Calculates distance of Bixi trips."""
+
 import logging
 import requests
 
 from bixi import Trip
 
 
-class TripDistanceCalculator(object):
+class ITripDistanceCalculator(object):
+    """Interface for trip distance calculators."""
     def distance(self, trip: Trip) -> float:
+        """Computes the distance for a trip."""
         return self.distances([trip])[0]
 
     def distances(self, trips: list[Trip]) -> list[float]:
+        """Computes the distance for a list of trip."""
         raise NotImplementedError()
 
 
-class GoogleMapsTripDistanceCalculator(TripDistanceCalculator):
+class GoogleMapsTripDistanceCalculator(ITripDistanceCalculator):
+    """Trip distance calculator using the Google Maps Distance Matrix API to
+    compute bicycling distances between the two stations in a trip.
+    """
+
     DISTANCE_MATRIX_URL = 'https://maps.googleapis.com/maps/api/distancematrix/json'
 
     def __init__(self, api_key: str):

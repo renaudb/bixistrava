@@ -3,7 +3,7 @@ Bixi to Strava Uploader
 
 ## Description
 
-Simple script to upload Bixi activities within a time range to Strava.
+Simple script to upload Bixi rides within a time range to Strava.
 
 ## Usage
 

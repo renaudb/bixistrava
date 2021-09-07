@@ -1,4 +1,20 @@
-#!/usr/bin/python3
+"""Simple script to upload Bixi rides within a time range to Strava.
+
+Fetches rides within a time range from Bixi, computes distances between stations
+using Google Maps and uploads the result to Strava.
+
+  Script usage:
+
+  ./.venv/bin/python3 bixistrava.py \
+    --start-date 2021-08-25 \
+    --end-date 2021-09-05 \
+    --bixi-username BIXI_USERNAME \
+    --bixi-password BIXI_PASSWORD \
+    --bixi-account BIXI_ACCOUNT \
+    --googlemaps-api-key GOOGLEMAPS_API_KEY \
+    --strava-client-id STRAVA_CLIENT_ID \
+    --strava-client-secret STRAVA_CLIENT_SECRET
+"""
 
 import argparse
 import logging
@@ -11,7 +27,7 @@ from strava import Strava
 from tripdistancecalculator import GoogleMapsTripDistanceCalculator
 
 
-def _get_args():
+def _get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description='Upload Bixi activities to Strava.')
     # Start/end dates.
@@ -92,7 +108,7 @@ def main():
     end = args.end_date
 
     logging.info('Connecting to Bixi.')
-    bixi = Bixi(username, password, account)
+    bixi = Bixi.login(username, password, account)
     logging.info('Connected to Bixi.')
 
     logging.info(f'Fetching trips from {start} to {end}')

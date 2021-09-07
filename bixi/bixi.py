@@ -11,16 +11,21 @@ from bixi.trip import Trip
 
 
 class Bixi(object):
+    """Bixi API client."""
+
     LOGIN_URL = 'https://secure.bixi.com/profile/login'
     LOGIN_CHECK_URL = 'https://secure.bixi.com/profile/login_check'
     TRIPS_URL = 'https://secure.bixi.com/profile/trips'
     STATIONS_URL = 'https://gbfs.velobixi.com/gbfs/en/station_information.json'
 
-    def __init__(self, username: str, password: str, account: str):
+    def __init__(self, session: requests.Session, account: str):
+        self._session = session
         self._account = account
-        self._session = self._login(username, password)
 
-    def _login(self, username, password) -> requests.Session:
+    @classmethod
+    def login(self, username: str, password: str, account: str) -> 'Bixi':
+        """Logs into Bixi using `username`, `password` and `account` returning an
+        authenticated Bixi client object."""
         # Start session
         with requests.Session() as session:
             # Get hidden inputs.
@@ -36,9 +41,10 @@ class Bixi(object):
                    for h in hidden}
             }
             r = session.post(self.LOGIN_CHECK_URL, data=data)
-            return session
+            return Bixi(session, account)
 
     def trips(self, start: datetime, end: datetime) -> list[Trip]:
+        """Gets all trips between `start` and `end`."""
         stations_by_name = {s.name: s for s in self.stations()}
         r = self._session.get(
             f'{self.TRIPS_URL}/{self._account}/print/preview',
@@ -59,24 +65,25 @@ class Bixi(object):
                                                           Station]) -> Trip:
         INFO_PREFIX = 'ed-html-table__item__info_trip-'
         tz = timezone('US/Eastern')
-        s_ds = start.find(class_=INFO_PREFIX +
-                          'start-date').contents[1].strip()
+        s_ds = start.find(
+            class_=f'{INFO_PREFIX}start-date').contents[1].strip()
         s_dt = tz.localize(datetime.strptime(s_ds, '%d/%m/%Y %H:%M:%S'))
-        s_station_name = start.find(class_=INFO_PREFIX +
-                                    'start-station').text.strip()
+        s_station_name = start.find(
+            class_=f'{INFO_PREFIX}start-station').text.strip()
         s_station = stations[s_station_name]
         if not s_station:
             logging.error(f'Missing start station: {s_station_name}')
-        e_ds = end.find(class_=INFO_PREFIX + 'end-date').contents[1].strip()
+        e_ds = end.find(class_=f'{INFO_PREFIX}end-date').contents[1].strip()
         e_dt = tz.localize(datetime.strptime(e_ds, '%d/%m/%Y %H:%M:%S'))
-        e_station_name = end.find(class_=INFO_PREFIX +
-                                  'end-station').text.strip()
+        e_station_name = end.find(
+            class_=f'{INFO_PREFIX}end-station').text.strip()
         e_station = stations[e_station_name]
         if not e_station:
             logging.error(f'Missing end station: {e_station_name}')
         return Trip(s_dt, s_station, e_dt, e_station)
 
     def stations(self) -> list[Station]:
+        """Gets all stations."""
         r = requests.get(self.STATIONS_URL)
         data = r.json()
         return [
