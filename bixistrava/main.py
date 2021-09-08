@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+import typing as t
 import os
 
 from datetime import datetime
@@ -10,22 +11,33 @@ from .strava import Strava
 from .tripdistancecalculator import GoogleMapsTripDistanceCalculator
 
 
-def _main(start: datetime, end: datetime, bixi_username: str,
-          bixi_password: str, bixi_account: str, googlemaps_api_key: str,
-          strava_client_id: str, strava_client_secret: str):
+def _main(start: datetime,
+          end: datetime,
+          bixi_username: str,
+          bixi_password: str,
+          bixi_account: str,
+          googlemaps_api_key: str,
+          strava_client_id: str,
+          strava_client_secret: str,
+          strava_refresh_token: str = None) -> t.Optional[str]:
+    # Log into Bixi.
     logging.info('Connecting to Bixi.')
     bixi = Bixi.login(bixi_username, bixi_password, bixi_account)
     logging.info('Connected to Bixi.')
 
+    # Fetch trips.
     logging.info(f'Fetching trips from {start} to {end}')
     trips = bixi.trips(start, end)
     logging.info(f'Fetched {len(trips)} trips')
     for t in trips:
         logging.debug(f'Trip: {t}')
 
+    # If no trips where fetched, return early.
     if not trips:
-        sys.exit(0)
+        logging.info(f'No trips fetched, ending early.')
+        return None
 
+    # Compute distances for all trips.
     logging.info('Calculating distances using Google Maps')
     calc = GoogleMapsTripDistanceCalculator(googlemaps_api_key)
     distances = calc.distances(trips)
@@ -33,10 +45,16 @@ def _main(start: datetime, end: datetime, bixi_username: str,
     for d in distances:
         logging.debug(f'Distance: {d}')
 
+    # Log into Strava.
     logging.info('Connecting to Strava')
-    strava = Strava.auth(strava_client_id, strava_client_secret)
+    if strava_refresh_token:
+        strava = Strava.refresh(strava_client_id, strava_client_secret,
+                                strava_refresh_token)
+    else:
+        strava = Strava.auth(strava_client_id, strava_client_secret)
     logging.info('Connected to Strava')
 
+    # Create activities.
     logging.info('Creating activities')
     for (t, d) in zip(trips, distances):
         r = strava.create_activity(
@@ -51,6 +69,8 @@ def _main(start: datetime, end: datetime, bixi_username: str,
         )
         logging.debug(f'Created activity: {r.json()}')
     logging.info('Created activities')
+
+    return strava.refresh_token
 
 
 def _get_args() -> argparse.Namespace:
@@ -140,8 +160,10 @@ def cloudfn():
     if not strava_client_secret:
         raise ValueError('Missing Strava client secret')
 
-    _main(start, end, bixi_username, bixi_password, bixi_account,
-          googlemaps_api_key, strava_client_id, strava_client_secret)
+    new_strava_refresh_token = _main(start, end, bixi_username, bixi_password,
+                                     bixi_account, googlemaps_api_key,
+                                     strava_client_id, strava_client_secret,
+                                     strava_refresh_token)
 
 
 if __name__ == "__main__":
