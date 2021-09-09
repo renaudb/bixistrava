@@ -24,3 +24,16 @@ python3 -m venv .venv
   --googlemaps-api-key GOOGLEMAPS_API_KEY \
   --strava-client-id STRAVA_CLIENT_ID \
   --strava-client-secret STRAVA_CLIENT_SECRET
+```
+
+## Test
+
+```shell
+./test.sh
+```
+
+## Lint
+
+```shell
+./lint.sh
+```
