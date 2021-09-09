@@ -1,7 +1,7 @@
 import requests
+import typing as t
 
 from datetime import datetime
-from typing import Any
 
 from .auth import auth, refresh
 
@@ -20,9 +20,13 @@ class StravaAuth(requests.auth.AuthBase):
 class Strava(object):
     API_URL = 'https://www.strava.com/api/v3/'
 
-    def __init__(self, access_token: str, refresh_token: str = ''):
+    def __init__(self,
+                 access_token: str,
+                 refresh_token: str = '',
+                 expires_at: t.Optional[datetime] = None):
         self.access_token = access_token
         self.refresh_token = refresh_token
+        self.expires_at = expires_at
 
     @classmethod
     def auth(cls, client_id: str, client_secret: str) -> 'Strava':
@@ -31,7 +35,8 @@ class Strava(object):
         """
         r = auth(client_id, client_secret)
         data = r.json()
-        return cls(data['access_token'], data['refresh_token'])
+        return cls(data['access_token'], data['refresh_token'],
+                   datetime.fromtimestamp(data['expires_at']))
 
     @classmethod
     def refresh(cls, client_id: str, client_secret: str,
@@ -41,7 +46,8 @@ class Strava(object):
         """
         r = refresh(client_id, client_secret, refresh_token)
         data = r.json()
-        return cls(data['access_token'], data['refresh_token'])
+        return cls(data['access_token'], data['refresh_token'],
+                   datetime.fromtimestamp(data['expires_at']))
 
     def _auth(self) -> StravaAuth:
         return StravaAuth(self.access_token)
