@@ -1,16 +1,3 @@
-"""Strava auth utilities.
-
-Includes functions as well as a simple script to perform Strava auth.
-
-  Script usage:
-
-  ./.venv/bin/python3 auth.py \
-    --client-id STRAVA_CLIENT_ID \
-    --client-secret STRAVA_CLIENT_SECRET
-"""
-
-import argparse
-import json
 import requests
 import typing as t
 import urllib.parse
@@ -102,29 +89,3 @@ def refresh(client_id: str, client_secret: str,
         grant_type='refresh_token',
         refresh_token=refresh_token,
     )
-
-
-def _get_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Authenticate with Strava.')
-    parser.add_argument(
-        '--client-id',
-        type=str,
-        required=True,
-    )
-    parser.add_argument(
-        '--client-secret',
-        type=str,
-        required=True,
-    )
-    return parser.parse_args()
-
-
-def main():
-    """Simple script to fetch and print a Strava `access_token`."""
-    args = _get_args()
-    r = auth(args.client_id, args.client_secret)
-    print(json.dumps(r.json(), sort_keys=True, indent=4))
-
-
-if __name__ == "__main__":
-    main()
