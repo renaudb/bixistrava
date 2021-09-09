@@ -2,7 +2,6 @@ import argparse
 import logging
 import sys
 import typing as t
-import os
 
 from datetime import datetime
 
@@ -120,6 +119,10 @@ def _get_args() -> argparse.Namespace:
         type=str,
         required=True,
     )
+    parser.add_argument(
+        '--strava-refresh-token',
+        type=str,
+    )
     return parser.parse_args()
 
 
@@ -132,38 +135,14 @@ def main():
     )
 
     args = _get_args()
-    _main(args.start_date, args.end_date, args.bixi_username,
-          args.bixi_password, args.bixi_account, args.googlemaps_api_key,
-          args.strava_client_id, args.strava_client_secret)
-
-
-def cloudfn():
-    start = datetime.today()
-    end = datetime.today()
-
-    bixi_username = os.environ.get('BIXI_USERNAME')
-    if not bixi_username:
-        raise ValueError('Missing Bixi username')
-    bixi_password = os.environ.get('BIXI_PASSWORD')
-    if not bixi_password:
-        raise ValueError('Missing Bixi password')
-    bixi_account = os.environ.get('BIXI_ACCOUNT')
-    if not bixi_account:
-        raise ValueError('Missing Bixi account')
-    googlemaps_api_key = os.environ.get('GOOGLEMAPS_API_KEY')
-    if not googlemaps_api_key:
-        raise ValueError('Missing Google Maps API key')
-    strava_client_id = os.environ.get('STRAVA_CLIENT_ID')
-    if not strava_client_id:
-        raise ValueError('Missing Strava client id')
-    strava_client_secret = os.environ.get('STRAVA_CLIENT_SECRET')
-    if not strava_client_secret:
-        raise ValueError('Missing Strava client secret')
-
-    new_strava_refresh_token = _main(start, end, bixi_username, bixi_password,
-                                     bixi_account, googlemaps_api_key,
-                                     strava_client_id, strava_client_secret,
-                                     strava_refresh_token)
+    strava_refresh_token = _main(args.start_date, args.end_date,
+                                 args.bixi_username, args.bixi_password,
+                                 args.bixi_account, args.googlemaps_api_key,
+                                 args.strava_client_id,
+                                 args.strava_client_secret,
+                                 args.strava_refresh_token)
+    if strava_refresh_token:
+        print(f'Strava refresh token: {strava_refresh_token}')
 
 
 if __name__ == "__main__":
