@@ -3,15 +3,15 @@ import logging
 import sys
 import typing as t
 
-from datetime import datetime
+from datetime import date, datetime
 
 from .bixi import Bixi, Station, Trip
 from .strava import Strava
 from .tripdistancecalculator import GoogleMapsTripDistanceCalculator
 
 
-def _main(start: datetime,
-          end: datetime,
+def _main(start: date,
+          end: date,
           bixi_username: str,
           bixi_password: str,
           bixi_account: str,
@@ -78,12 +78,12 @@ def _get_args() -> argparse.Namespace:
     # Start/end dates.
     parser.add_argument(
         '--start-date',
-        type=lambda s: datetime.strptime(s, '%Y-%m-%d'),
+        type=lambda s: datetime.strptime(s, '%Y-%m-%d').date(),
         required=True,
     )
     parser.add_argument(
         '--end-date',
-        type=lambda s: datetime.strptime(s, '%Y-%m-%d'),
+        type=lambda s: datetime.strptime(s, '%Y-%m-%d').date(),
         required=True,
     )
     # Bixi arguments.

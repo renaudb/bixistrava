@@ -2,7 +2,7 @@ import logging
 import requests
 
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pytz import timezone
 from urllib.parse import urlparse
 
@@ -43,7 +43,7 @@ class Bixi(object):
             r = session.post(self.LOGIN_CHECK_URL, data=data)
             return Bixi(session, account)
 
-    def trips(self, start: datetime, end: datetime) -> list[Trip]:
+    def trips(self, start: date, end: date) -> list[Trip]:
         """Gets all trips between `start` and `end`."""
         stations_by_name = {s.name: s for s in self.stations()}
         r = self._session.get(
