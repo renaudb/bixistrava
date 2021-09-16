@@ -10,7 +10,7 @@ from test import testdata
 
 def test_trips():
     account = 'TEST-1'
-    dt = datetime(2021, 8, 24)
+    dt = datetime(2021, 8, 24).date()
     ds = dt.strftime('%d/%m/%Y')
     uri = f'https://secure.bixi.com/profile/trips/{account}/print/preview?edTripsPrint%5BstartDate%5D={ds}&edTripsPrint%5BendDate%5D={ds}'
     with open(testdata.path('bixi/print.html')) as f:
